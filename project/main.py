@@ -36,7 +36,7 @@ async def calculator_terminal():
     device = await BleakScanner.find_device_by_filter(match_cds_uuid)
 
     if device is None:
-        print("no matching device found, you may need to edit match_cds_uuid().")
+        print("No matching device found, you may need to edit match_cds_uuid().")
         sys.exit(1)
 
     def handle_disconnect(_: BleakClient):
@@ -46,16 +46,18 @@ async def calculator_terminal():
             task.cancel()
 
     def handle_notification(_: BleakGATTCharacteristic, data: bytearray):
-        # if self.mode == FLOAT_MODE:
-        #     result = struct.unpack('f', data)   # unpack little-endian byte order
-        # elif self.mode == FIXED_MODE:
-        #     result = struct.unpack('i', data)   # unpack little-endian byte order
         nonlocal notify_event
-        result = struct.unpack('i', data)[0]   # unpack little-endian byte order, [0] retrieves the first (and only) value from the tuple
-        print("Received operation result:", result)
+        
+        # result = struct.unpack('i', data)[0]
+        if calc.mode == 0:
+            result = struct.unpack('f', data)[0]  # Unpack little-endian byte order, [0] retrieves the first (and only) value from the tuple
+        elif calc.mode == 1:
+            result = struct.unpack('i', data)[0]  # unpack little-endian byte order, [0] retrieves the first (and only) value from the tuple
+            result = result / float(1 << 31)
+        
+        print("--------> Received operation result:", result)
         notify_event.set()  # Set the event when notification is received
         
-
 
     async with BleakClient(device, disconnected_callback=handle_disconnect) as client:
         # Start receiving notifications
@@ -69,7 +71,7 @@ async def calculator_terminal():
         while True:
             data = calc.run_calculator()
             
-            if data == 'mode':
+            if data == 'mode' or data == 'go_again':
                 continue
             if data == 'goodbye':
                 break
