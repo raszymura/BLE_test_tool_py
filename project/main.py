@@ -1,4 +1,5 @@
 """
+main.py
 CDS Service Test Tool 
 -------------
 Interactive terminal for BLE Calculator Application with nRF Connect SDK on Nordic Devkit
@@ -24,6 +25,7 @@ async def calculator_terminal():
     It reads operands and operation from stdin and sends data to the device.
     Result received from the device is printed to stdout.
     """
+    notify_event = asyncio.Event()
     
     def match_cds_uuid(device: BLEDevice, adv: AdvertisementData):
         # This assumes that the device includes the Calculator Data Service (CDS) UUID in the advertising data.
@@ -48,12 +50,15 @@ async def calculator_terminal():
         #     result = struct.unpack('f', data)   # unpack little-endian byte order
         # elif self.mode == FIXED_MODE:
         #     result = struct.unpack('i', data)   # unpack little-endian byte order
+        nonlocal notify_event
         result = struct.unpack('i', data)[0]   # unpack little-endian byte order, [0] retrieves the first (and only) value from the tuple
         print("Received operation result:", result)
+        notify_event.set()  # Set the event when notification is received
         
 
 
     async with BleakClient(device, disconnected_callback=handle_disconnect) as client:
+        # Start receiving notifications
         await client.start_notify(NOTIFY_UUID, handle_notification)  # Receive data
         print("Connected!")
         
@@ -71,6 +76,9 @@ async def calculator_terminal():
 
             await client.write_gatt_char(write_data, data, response=False)  # Send data
             # print("sent:", data)
+            
+            await notify_event.wait()  # Wait for notification before proceeding to the next iteration
+            notify_event.clear()  # Reset the event for the next notification
 
 
 if __name__ == "__main__":
