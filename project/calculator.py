@@ -77,7 +77,7 @@ class Calculator:
             try:
                 if self.use_previous_result:
                     self.use_previous_result = False
-                    if self.result >= 1.0 or self.result < -1.0:
+                    if self.mode == FIXED_MODE and (self.result >= 1.0 or self.result < -1.0):
                         print("Out of range. Please enter a valid number in range <-1, 1)")
                         continue
                     return self.result
@@ -98,11 +98,11 @@ class Calculator:
             """
             Convert a floating-point number to Q31 fixed-point format. Q31 format represents numbers as a 32-bit signed integer.
             """
-            return int(value * (1 << 31))
+            return int(value * (1 << 31))  # Multiply `value` by 2^31 and return the result as an integer
 
     def run_calculator(self):
         """Main loop to run the calculator"""
-        print("\nChoose operation in mode: ----------------------------")
+        print("\n-------------- Choose operation in mode: --------------")
         if self.mode == FLOAT_MODE:
             print("--> FLOAT <--")
         elif self.mode == FIXED_MODE:
