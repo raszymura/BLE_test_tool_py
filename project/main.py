@@ -48,7 +48,6 @@ async def calculator_terminal():
     def handle_notification(_: BleakGATTCharacteristic, data: bytearray):
         nonlocal notify_event
         
-        # result = struct.unpack('i', data)[0]
         if calc.mode == 0:
             result = struct.unpack('f', data)[0]  # Unpack little-endian byte order, [0] retrieves the first (and only) value from the tuple
         elif calc.mode == 1:
@@ -56,6 +55,7 @@ async def calculator_terminal():
             result = result / float(1 << 31)
         
         print("--------> Received operation result:", result)
+        calc.result = result  # Update result
         notify_event.set()  # Set the event when notification is received
         
 

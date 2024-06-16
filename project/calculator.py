@@ -3,9 +3,10 @@ calculator.py
 -------------
 For selecting calculator operations:
 1. Calculate
-2. Reset
-3. Change Mode (float or fixed)
-4. Exit
+2. Use previous result
+3. Reset
+4. Change Mode (float or fixed)
+5. Exit
 Calculate operations number:
 (1) addition
 (2) subtraction
@@ -41,12 +42,14 @@ class Calculator:
     def __init__(self):
         self.mode = FLOAT_MODE  # Default FLOAT_MODE
         self.result = 0
+        self.use_previous_result = False  # Flag to use previous result  in calculations
         self.reset()
 
     def reset(self):
         self.num1 = 0
         self.num2 = 0
         self.operation = 0
+        self.use_previous_result = False 
 
     def change_mode(self):
         if self.mode == FIXED_MODE:
@@ -72,14 +75,22 @@ class Calculator:
     def get_number(self, prompt):
         while True:
             try:
-                if self.mode == FLOAT_MODE:
-                    return float(input(prompt))
-                elif self.mode == FIXED_MODE:
-                    prompt = float(input(prompt))
-                    if prompt >= 1.0 or prompt < -1.0:
+                if self.use_previous_result:
+                    self.use_previous_result = False
+                    if self.result >= 1.0 or self.result < -1.0:
                         print("Out of range. Please enter a valid number in range <-1, 1)")
                         continue
-                    return prompt
+                    return self.result
+                else:  # Calculate mode
+                    if self.mode == FLOAT_MODE:
+                        return float(input(prompt))
+                    elif self.mode == FIXED_MODE:
+                        prompt = float(input(prompt))
+                        if prompt >= 1.0 or prompt < -1.0:
+                            print("Out of range. Please enter a valid number in range <-1, 1)")
+                            prompt = ''
+                            continue
+                        return prompt
             except ValueError:
                 print("Invalid input. Please enter a valid number.")
                 
@@ -91,16 +102,17 @@ class Calculator:
 
     def run_calculator(self):
         """Main loop to run the calculator"""
-        print("\nChoose operation in mode:")
+        print("\nChoose operation in mode: ----------------------------")
         if self.mode == FLOAT_MODE:
-            print("-> FLOAT <-")
+            print("--> FLOAT <--")
         elif self.mode == FIXED_MODE:
-            print("-> FIXED <-")
+            print("--> FIXED <--")
             
         print("1. Calculate")
-        print("2. Reset")
-        print("3. Change Mode (float or fixed)")
-        print("4. Exit")
+        print("2. Use previous result =", self.result)
+        print("3. Reset")
+        print("4. Change Mode (float or fixed)")
+        print("5. Exit")
         print("----------------------------")
         choice = input("Enter your choice: ")
         print("----------------------------")
@@ -109,13 +121,19 @@ class Calculator:
             self.num1 = self.get_number("Enter first number: ")
             self.operate()
             self.num2 = self.get_number("Enter second number: ")
-        elif choice == '2':  # Reset
+        elif choice == '2':  # Use previous result
+            self.use_previous_result = True
+            print("Using previous result: ", self.result)
+            self.num1 = self.get_number("First number: ")
+            self.operate()
+            self.num2 = self.get_number("Enter second number: ")
+        elif choice == '3':  # Reset
             self.reset()
-        elif choice == '3':  # Change Mode
+        elif choice == '4':  # Change Mode
             print("The mode has been changed!")
             self.change_mode()
             return 'go_again'
-        elif choice == '4':  # Exit
+        elif choice == '5':  # Exit
             print("Exiting calculator. Goodbye!")
             return 'goodbye'
         else:
