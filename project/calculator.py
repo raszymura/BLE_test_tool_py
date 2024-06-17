@@ -100,6 +100,12 @@ class Calculator:
             """
             return int(value * (1 << 31))  # Multiply `value` by 2^31 and return the result as an integer
 
+    def num1_less_than_num2(self):
+        if self.mode == FIXED_MODE and self.operation == 4:
+            while abs(self.num1) >= abs(self.num2):
+                print("First number must be smaller than the second number in absolute value.")
+                self.num2 = self.get_number("Enter second number: ")
+    
     def run_calculator(self):
         """Main loop to run the calculator"""
         print("\n-------------- Choose operation in mode: --------------")
@@ -121,12 +127,14 @@ class Calculator:
             self.num1 = self.get_number("Enter first number: ")
             self.operate()
             self.num2 = self.get_number("Enter second number: ")
+            self.num1_less_than_num2()
         elif choice == '2':  # Use previous result
             self.use_previous_result = True
             print("Using previous result: ", self.result)
             self.num1 = self.get_number("First number: ")
             self.operate()
             self.num2 = self.get_number("Enter second number: ")
+            self.num1_less_than_num2()
         elif choice == '3':  # Reset
             self.reset()
         elif choice == '4':  # Change Mode
