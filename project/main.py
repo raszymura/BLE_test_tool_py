@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 """
 main.py
 CDS Service Test Tool 
